@@ -15,27 +15,105 @@ GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 100;
 
-class Vector
-{
+
+#include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <glut.h>
+
+#define GLUT_KEY_ESCAPE 27
+#define DEG2RAD(a) (a * 0.0174532925)
+
+class Vector3f {
 public:
-	GLdouble x, y, z;
-	Vector() {}
-	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
-	//================================================================================================//
-	// Operator Overloading; In C++ you can override the behavior of operators for you class objects. //
-	// Here we are overloading the += operator to add a given value to all vector coordinates.        //
-	//================================================================================================//
-	void operator +=(float value)
-	{
-		x += value;
-		y += value;
-		z += value;
+	float x, y, z;
+
+	Vector3f(float _x = 0.0f, float _y = 0.0f, float _z = 0.0f) {
+		x = _x;
+		y = _y;
+		z = _z;
+	}
+
+	Vector3f operator+(Vector3f& v) {
+		return Vector3f(x + v.x, y + v.y, z + v.z);
+	}
+
+	Vector3f operator-(Vector3f& v) {
+		return Vector3f(x - v.x, y - v.y, z - v.z);
+	}
+
+	Vector3f operator*(float n) {
+		return Vector3f(x * n, y * n, z * n);
+	}
+
+	Vector3f operator/(float n) {
+		return Vector3f(x / n, y / n, z / n);
+	}
+
+	Vector3f unit() {
+		return *this / sqrt(x * x + y * y + z * z);
+	}
+
+	Vector3f cross(Vector3f v) {
+		return Vector3f(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
 	}
 };
 
-Vector Eye(20, 5, 20);
-Vector At(0, 0, 0);
-Vector Up(0, 1, 0);
+class Camera {
+public:
+	Vector3f eye, center, up;
+
+	Camera(float eyeX = 0.0f, float eyeY = 2.0f, float eyeZ = 3.0f, float centerX = 0.0f, float centerY = 0.0f, float centerZ = 0.0f, float upX = 0.0f, float upY = 1.0f, float upZ = 0.0f) {
+		eye = Vector3f(eyeX, eyeY, eyeZ);
+		center = Vector3f(centerX, centerY, centerZ);
+		up = Vector3f(upX, upY, upZ);
+	}
+
+	void moveX(float d) {
+		Vector3f right = up.cross(center - eye).unit();
+		eye = eye + right * d;
+		center = center + right * d;
+	}
+
+	void moveY(float d) {
+		eye = eye + up.unit() * d;
+		center = center + up.unit() * d;
+	}
+
+	void moveZ(float d) {
+		Vector3f view = (center - eye).unit();
+		eye = eye + view * d;
+		center = center + view * d;
+	}
+
+	void rotateX(float a) {
+		Vector3f view = (center - eye).unit();
+		Vector3f right = up.cross(view).unit();
+		view = view * cos(DEG2RAD(a)) + up * sin(DEG2RAD(a));
+		up = view.cross(right);
+		center = eye + view;
+	}
+
+	void rotateY(float a) {
+		Vector3f view = (center - eye).unit();
+		Vector3f right = up.cross(view).unit();
+		view = view * cos(DEG2RAD(a)) + right * sin(DEG2RAD(a));
+		right = view.cross(up);
+		center = eye + view;
+	}
+
+	void look() {
+		gluLookAt(
+			eye.x, eye.y, eye.z,
+			center.x, center.y, center.z,
+			up.x, up.y, up.z
+		);
+	}
+};
+
+Camera camera;
+
+
 
 int cameraZoom = 0;
 
@@ -99,6 +177,15 @@ void InitMaterial()
 //=======================================================================
 // OpengGL Configuration Function
 //=======================================================================
+void setupCamera() {
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+	gluPerspective(60, 640 / 480, 0.001, 100);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	camera.look();
+}
 void myInit(void)
 {
 	glClearColor(0.0, 0.0, 0.0, 0.0);
@@ -117,8 +204,8 @@ void myInit(void)
 	glMatrixMode(GL_MODELVIEW);
 
 	glLoadIdentity();
-
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+	setupCamera();
+	//gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
 	//*******************************************************************************************//
 	// EYE (ex, ey, ez): defines the location of the camera.									 //
 	// AT (ax, ay, az):	 denotes the direction where the camera is aiming at.					 //
@@ -169,6 +256,25 @@ void RenderGround()
 //=======================================================================
 // Display Function
 //=======================================================================
+void drawLevel1() {
+	glPushMatrix();
+	glColor3f(0.1,1, 0);
+	// glColor3f(0.1,0.4,0);
+	glScaled(1.9, 0.05, 1.9);
+	glutSolidCube(1);
+
+	glPopMatrix();
+}
+void drawLevel2() {
+	glPushMatrix();
+	glColor3f(0.1,1, 0);
+	// glColor3f(0.1,0.4,0);
+	glScaled(1.9, 0.05, 1.9);
+	glutSolidCube(1);
+
+	glPopMatrix();
+}
+
 void myDisplay(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -183,22 +289,28 @@ void myDisplay(void)
 	// Draw Ground
 	RenderGround();
 
-	// Draw Tree Model
-	glPushMatrix();
-	glTranslatef(10, 0, 0);
-	glScalef(0.7, 0.7, 0.7);
-	model_tree.Draw();
-	glPopMatrix();
 
-	// Draw house Model
-	glPushMatrix();
-	glRotatef(90.f, 1, 0, 0);
-	model_house.Draw();
+	drawLevel1();
+glPushMatrix();
+glTranslated(0, 0, -5);
+	drawLevel2();
 	glPopMatrix();
+	//// Draw Tree Model
+	//glPushMatrix();
+	//glTranslatef(10, 0, 0);
+	//glScalef(0.7, 0.7, 0.7);
+	//model_tree.Draw();
+	//glPopMatrix();
+
+	//// Draw house Model
+	//glPushMatrix();
+	//glRotatef(90.f, 1, 0, 0);
+	//model_house.Draw();
+	//glPopMatrix();
 
 
 	//sky box
-	glPushMatrix();
+	/*glPushMatrix();
 
 	GLUquadricObj* qobj;
 	qobj = gluNewQuadric();
@@ -211,11 +323,11 @@ void myDisplay(void)
 	gluDeleteQuadric(qobj);
 
 
-	glPopMatrix();
-
+	glPopMatrix();*/
 
 
 	glutSwapBuffers();
+
 }
 
 //=======================================================================
@@ -244,32 +356,32 @@ void myKeyboard(unsigned char button, int x, int y)
 //=======================================================================
 // Motion Function
 //=======================================================================
-void myMotion(int x, int y)
-{
-	y = HEIGHT - y;
-
-	if (cameraZoom - y > 0)
-	{
-		Eye.x += -0.1;
-		Eye.z += -0.1;
-	}
-	else
-	{
-		Eye.x += 0.1;
-		Eye.z += 0.1;
-	}
-
-	cameraZoom = y;
-
-	glLoadIdentity();	//Clear Model_View Matrix
-
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
-
-	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-
-	glutPostRedisplay();	//Re-draw scene 
-}
+//void myMotion(int x, int y)
+//{
+//	y = HEIGHT - y;
+//
+//	if (cameraZoom - y > 0)
+//	{
+//		Eye.x += -0.1;
+//		Eye.z += -0.1;
+//	}
+//	else
+//	{
+//		Eye.x += 0.1;
+//		Eye.z += 0.1;
+//	}
+//
+//	cameraZoom = y;
+//
+//	glLoadIdentity();	//Clear Model_View Matrix
+//
+//	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+//
+//	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+//	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+//
+//	glutPostRedisplay();	//Re-draw scene 
+//}
 
 //=======================================================================
 // Mouse Function
@@ -287,28 +399,28 @@ void myMouse(int button, int state, int x, int y)
 //=======================================================================
 // Reshape Function
 //=======================================================================
-void myReshape(int w, int h)
-{
-	if (h == 0) {
-		h = 1;
-	}
-
-	WIDTH = w;
-	HEIGHT = h;
-
-	// set the drawable region of the window
-	glViewport(0, 0, w, h);
-
-	// set up the projection matrix 
-	glMatrixMode(GL_PROJECTION);
-	glLoadIdentity();
-	gluPerspective(fovy, (GLdouble)WIDTH / (GLdouble)HEIGHT, zNear, zFar);
-
-	// go back to modelview matrix so we can move the objects about
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
-}
+//void myReshape(int w, int h)
+//{
+//	if (h == 0) {
+//		h = 1;
+//	}
+//
+//	WIDTH = w;
+//	HEIGHT = h;
+//
+//	// set the drawable region of the window
+//	glViewport(0, 0, w, h);
+//
+//	// set up the projection matrix 
+//	glMatrixMode(GL_PROJECTION);
+//	glLoadIdentity();
+//	gluPerspective(fovy, (GLdouble)WIDTH / (GLdouble)HEIGHT, zNear, zFar);
+//
+//	// go back to modelview matrix so we can move the objects about
+//	glMatrixMode(GL_MODELVIEW);
+//	glLoadIdentity();
+//	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+//}
 
 //=======================================================================
 // Assets Loading Function
@@ -343,15 +455,15 @@ void main(int argc, char** argv)
 
 	glutKeyboardFunc(myKeyboard);
 
-	glutMotionFunc(myMotion);
+	//glutMotionFunc(myMotion);
 
 	glutMouseFunc(myMouse);
 
-	glutReshapeFunc(myReshape);
+	//glutReshapeFunc(myReshape);
 
 	myInit();
 
-	LoadAssets();
+	//LoadAssets();// bet7amel el bmbsssssssssssssssssss
 	glEnable(GL_DEPTH_TEST);
 	glEnable(GL_LIGHTING);
 	glEnable(GL_LIGHT0);
