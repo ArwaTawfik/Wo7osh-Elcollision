@@ -1,3 +1,4 @@
+#include "windows.h"
 #include "TextureBuilder.h"
 #include "Model_3DS.h"
 #include "GLTexture.h"
