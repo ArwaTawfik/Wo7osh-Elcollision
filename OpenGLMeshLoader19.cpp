@@ -33,8 +33,11 @@ public:
 	}
 };
 
-Vector Eye(0, 10, 0);
-Vector At(0, 0, -30);
+
+
+
+Vector Eye(0, 20, 0);
+Vector At(0, 0, -20);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -196,6 +199,97 @@ void RenderGround()
 //=======================================================================
 // Display Function
 //=======================================================================
+
+void brickWall(int g,int z) {
+	//draw brickwall
+	glPushMatrix();
+	glTranslatef(g, 3, -25+z);
+	glScalef(0.4, 0.5, 1);
+	model_brickWall.Draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(g, 3, -24.7+z);
+	glScalef(0.4, 0.5, 1);
+	model_brickWall.Draw();
+	glPopMatrix();
+
+}
+
+void brickBorders() {
+	int g = -20;
+	for (int i = 0;i < 8;i++) {
+		glPushMatrix();
+		glTranslatef(-20, 3, g);
+		glRotatef(90, 0, 1, 0);
+		glScalef(0.4, 0.5, 1);
+		model_brickWall.Draw();
+		glPopMatrix();
+		g = g - 5;
+	}
+	g = -20;
+	for (int i = 0;i < 8;i++) {
+		glPushMatrix();
+		glTranslatef(20, 3, g);
+		glRotatef(90, 0, 1, 0);
+		glScalef(0.4, 0.5, 1);
+		model_brickWall.Draw();
+		glPopMatrix();
+		g = g - 5;
+	}
+}
+
+void drawLevel1Walls() {
+
+}
+
+void drawBrickWalls(int noWall,int z) {
+	//noWall is where I dont want a wall to block path
+
+	int g = -20;
+	for (int i = 0;i < 8;i++) {
+		if (i != noWall) {
+			brickWall(g, z);
+		}	
+		g = g + 5;
+	}
+
+
+}
+
+void drawLevel2Walls() {
+
+	//you can pick where the missing wall is
+	//by changeing fhte first parameter
+	//from 0 => 7
+	drawBrickWalls(4,0);
+
+	drawBrickWalls(6,-7);
+
+	drawBrickWalls(1,-14);
+
+	drawBrickWalls(5, -21);
+
+	drawBrickWalls(2, -28);
+
+	drawBrickWalls(-1, -35);
+
+	
+	brickBorders();
+
+}
+
+
+void renderLevel1() {
+
+}
+
+void renderLevel2() {
+
+	drawLevel2Walls();
+
+}
+
 void myDisplay(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -209,6 +303,12 @@ void myDisplay(void)
 
 	// Draw Ground
 	RenderGround();
+
+
+	//
+	renderLevel1();
+
+	renderLevel2();
 
 	// Draw Tree Model
 	glPushMatrix();
@@ -265,6 +365,29 @@ void myKeyboard(unsigned char button, int x, int y)
 		break;
 	}
 
+	switch (button)
+	{
+	case'4':
+			Eye.x -= 0.1;
+			At.x -= 0.1;
+			break;
+	case'6':
+		Eye.x += 0.1;
+		At.x += 0.1;
+		break;
+		default:
+			break;
+	}
+
+	glLoadIdentity();	//Clear Model_View Matrix
+
+	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+
+	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glutPostRedisplay();	//Re-draw s
+
 	glutPostRedisplay();
 }
 
@@ -277,13 +400,13 @@ void myMotion(int x, int y)
 
 	if (cameraZoom - y > 0)
 	{
-		//Eye.x += -0.1;
 		Eye.z += -0.1;
+		At.z += -0.1;
 	}
 	else
 	{
-		//Eye.x += 0.1;
 		Eye.z += 0.1;
+		At.z +=0.1;
 	}
 
 	cameraZoom = y;
@@ -346,6 +469,8 @@ void LoadAssets()
 	// Loading Model files
 	model_house.Load("Models/house/house.3DS");
 	model_tree.Load("Models/tree/Tree1.3ds");
+
+	model_brickWall.Load("models/brickWall/wall.3DS");
 
 	// Loading texture files
 	//tex_grasswall.Load("Textures/grasswall2.bmp");
