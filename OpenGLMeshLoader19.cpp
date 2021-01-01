@@ -36,8 +36,8 @@ public:
 
 
 
-Vector Eye(0, 20, 0);
-Vector At(0, 0, -20);
+Vector Eye(0, 18,40 );
+Vector At(0, 0, 20);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -200,6 +200,24 @@ void RenderGround()
 // Display Function
 //=======================================================================
 
+void skyBox() {
+	glPushMatrix();
+
+	GLUquadricObj* qobj;
+	qobj = gluNewQuadric();
+	glTranslated(50, 0, 0);
+	glRotated(90, 1, 0, 1);
+	glBindTexture(GL_TEXTURE_2D, tex);
+	gluQuadricTexture(qobj, true);
+	gluQuadricNormals(qobj, GL_SMOOTH);
+	gluSphere(qobj, 100, 100, 100);
+	gluDeleteQuadric(qobj);
+
+
+	glPopMatrix();
+
+}
+
 void brickWall(int g,int z) {
 	//draw brickwall
 	glPushMatrix();
@@ -212,6 +230,22 @@ void brickWall(int g,int z) {
 	glTranslatef(g, 3, -24.7+z);
 	glScalef(0.4, 0.5, 1);
 	model_brickWall.Draw();
+	glPopMatrix();
+
+}
+
+void grassWall(int g, int z) {
+	//draw brickwall
+	glPushMatrix();
+	glTranslatef(g, 3, -15 + z);
+	glScalef(0.4, 0.5, 1);
+	model_grassWall.Draw();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslatef(g, 3, -15.7 + z);
+	glScalef(0.4, 0.5, 1);
+	model_grassWall.Draw();
 	glPopMatrix();
 
 }
@@ -239,8 +273,27 @@ void brickBorders() {
 	}
 }
 
-void drawLevel1Walls() {
-
+void grassBorders() {
+	int g = 20;
+	for (int i = 0;i < 8;i++) {
+		glPushMatrix();
+		glTranslatef(-20, 3, g);
+		glRotatef(90, 0, 1, 0);
+		glScalef(0.4, 0.5, 1);
+		model_grassWall.Draw();
+		glPopMatrix();
+		g = g - 5;
+	}
+	g = 20;
+	for (int i = 0;i < 8;i++) {
+		glPushMatrix();
+		glTranslatef(20, 3, g);
+		glRotatef(90, 0, 1, 0);
+		glScalef(0.4, 0.5, 1);
+		model_grassWall.Draw();
+		glPopMatrix();
+		g = g - 5;
+	}
 }
 
 void drawBrickWalls(int noWall,int z) {
@@ -254,6 +307,44 @@ void drawBrickWalls(int noWall,int z) {
 		g = g + 5;
 	}
 
+
+}
+
+
+
+void drawGrassWalls(int noWall, int z) {
+	//noWall is where I dont want a wall to block path
+
+	int g = -20;
+	for (int i = 0;i < 8;i++) {
+		if (i != noWall) {
+			grassWall(g, z);
+		}
+		g = g + 5;
+	}
+
+
+}
+
+
+
+void drawLevel1Walls() {
+
+	drawGrassWalls(-1, 35);
+
+	drawGrassWalls(6,30);
+
+	drawGrassWalls(1, 23);
+
+	drawGrassWalls(4, 16);
+
+	drawGrassWalls(6, 9);
+
+	drawGrassWalls(3, 2);
+
+	drawGrassWalls(1, -4.5);
+
+	grassBorders();
 
 }
 
@@ -280,7 +371,10 @@ void drawLevel2Walls() {
 }
 
 
+
 void renderLevel1() {
+
+	drawLevel1Walls();
 
 }
 
@@ -289,6 +383,7 @@ void renderLevel2() {
 	drawLevel2Walls();
 
 }
+
 
 void myDisplay(void)
 {
@@ -305,41 +400,27 @@ void myDisplay(void)
 	RenderGround();
 
 
-	//
+
 	renderLevel1();
 
 	renderLevel2();
 
 	// Draw Tree Model
-	glPushMatrix();
+	/*glPushMatrix();
 	glTranslatef(10, 0, 0);
 	glScalef(0.7, 0.7, 0.7);
 	model_tree.Draw();
-	glPopMatrix();
+	glPopMatrix();*/
 
 	// Draw house Model
-	glPushMatrix();
+	/*glPushMatrix();
 	glRotatef(90.f, 1, 0, 0);
 	model_house.Draw();
-	glPopMatrix();
+	glPopMatrix();*/
 
 
 	//sky box
-	glPushMatrix();
-
-	GLUquadricObj* qobj;
-	qobj = gluNewQuadric();
-	glTranslated(50, 0, 0);
-	glRotated(90, 1, 0, 1);
-	glBindTexture(GL_TEXTURE_2D, tex);
-	gluQuadricTexture(qobj, true);
-	gluQuadricNormals(qobj, GL_SMOOTH);
-	gluSphere(qobj, 100, 100, 100);
-	gluDeleteQuadric(qobj);
-
-
-	glPopMatrix();
-
+	skyBox();
 
 
 	glutSwapBuffers();
@@ -350,33 +431,32 @@ void myDisplay(void)
 //=======================================================================
 void myKeyboard(unsigned char button, int x, int y)
 {
+
 	switch (button)
 	{
-	case 'w':
-		glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	case'a':
+			Eye.x -= 0.2;
+			At.x -= 0.2;
+			break;
+	case'd':
+		Eye.x += 0.2;
+		At.x += 0.2;
 		break;
-	case 'r':
-		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		
+	case'w':
+		Eye.z -= 0.2;
+		At.z -= 0.2;
 		break;
-	case 27:
+	case's':
+		Eye.z += 0.2;
+		At.z += 0.2;
+		break;
+
+	case GLUT_KEY_F1:
 		exit(0);
 		break;
 	default:
 		break;
-	}
-
-	switch (button)
-	{
-	case'4':
-			Eye.x -= 0.1;
-			At.x -= 0.1;
-			break;
-	case'6':
-		Eye.x += 0.1;
-		At.x += 0.1;
-		break;
-		default:
-			break;
 	}
 
 	glLoadIdentity();	//Clear Model_View Matrix
@@ -467,15 +547,18 @@ void myReshape(int w, int h)
 void LoadAssets()
 {
 	// Loading Model files
-	model_house.Load("Models/house/house.3DS");
-	model_tree.Load("Models/tree/Tree1.3ds");
+
+	//model_house.Load("Models/house/house.3DS");
+
+	//model_tree.Load("Models/tree/Tree1.3ds");
 
 	model_brickWall.Load("models/brickWall/wall.3DS");
 
-	// Loading texture files
-	//tex_grasswall.Load("Textures/grasswall2.bmp");
+	model_grassWall.Load("models/grassWall/wall.3DS");
+
+
 	tex_brickground.Load("Textures/brickFloor.bmp");
-	tex_ground.Load("Textures/ground.bmp");
+	tex_ground.Load("Textures/grass.bmp");
 	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
 }
 
