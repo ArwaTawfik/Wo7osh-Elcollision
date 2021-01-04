@@ -7,6 +7,9 @@ int WIDTH = 1280;
 int HEIGHT = 720;
 
 GLuint tex;
+GLuint bushtex;
+GLuint spiketex;
+
 char title[] = "3D Model Loader Sample";
 
 // 3D Projection Options
@@ -35,6 +38,11 @@ public:
 
 
 
+//Note on camera:
+//--Eye is where the camera itself is
+//--AT is the point where the camera is looking at
+
+// so to move it forward i translate the eye and at at the same time
 
 Vector Eye(0, 18,40 );
 Vector At(0, 0, 20);
@@ -55,6 +63,8 @@ Model_3DS model_brickWall;
 GLTexture tex_ground;
 GLTexture tex_brickground;
 GLTexture tex_grasswall;
+GLTexture tex_bush;
+
 
 //=======================================================================
 // Lighting Configuration Function
@@ -212,8 +222,71 @@ void skyBox() {
 	gluQuadricNormals(qobj, GL_SMOOTH);
 	gluSphere(qobj, 100, 100, 100);
 	gluDeleteQuadric(qobj);
+	glPopMatrix();
+
+}
+
+void bushes() {
+	glPushMatrix();
+	GLUquadricObj* qobj;
+	qobj = gluNewQuadric();
+	glTranslated(9, 1, 3);
+	//glRotated(90, 1, 0, 1);
+	glBindTexture(GL_TEXTURE_2D, bushtex);
+	gluQuadricTexture(qobj, true);
+	gluQuadricNormals(qobj, GL_SMOOTH);
+	gluSphere(qobj, 2, 100, 100);
+	gluDeleteQuadric(qobj);
+	glPopMatrix();
+
+	glPushMatrix();
+	//GLUquadricObj* qobj;
+	qobj = gluNewQuadric();
+	glTranslated(-12, 1, -10);
+	//glRotated(90, 1, 0, 1);
+	glBindTexture(GL_TEXTURE_2D, bushtex);
+	gluQuadricTexture(qobj, true);
+	gluQuadricNormals(qobj, GL_SMOOTH);
+	gluSphere(qobj, 2, 100, 100);
+	gluDeleteQuadric(qobj);
+	glPopMatrix();
+
+}
 
 
+void spike() {
+	glPushMatrix();
+	GLUquadricObj* qobj;
+	qobj = gluNewQuadric();
+	glRotated(-90, 1, 0, 0);
+	glTranslatef(0,-3.0f,0);
+	glBindTexture(GL_TEXTURE_2D, spiketex);
+	gluQuadricTexture(qobj, true);
+	gluQuadricNormals(qobj, GL_SMOOTH);
+	// glu.gluCylinder(quadric, bottomRadius, topRadius, height, slices, rings)
+	gluCylinder(qobj, 0.3, 0, 2, 50, 50);
+	gluDeleteQuadric(qobj);
+	glPopMatrix();
+}
+void spikes() {
+
+
+	glPushMatrix();
+	glTranslated(5, 1, 3);
+	spike();
+	glPopMatrix();
+
+	glPushMatrix();
+	glTranslated(5, 1, 4);
+	spike();
+	glPopMatrix();
+	glPushMatrix();
+	glTranslated(5, 1, 5);
+	spike();
+	glPopMatrix();
+	glPushMatrix();
+	glTranslated(5, 1, 6);
+	spike();
 	glPopMatrix();
 
 }
@@ -326,7 +399,17 @@ void drawGrassWalls(int noWall, int z) {
 
 }
 
+void drawSpikes() {
 
+	glPushMatrix();
+	glTranslatef(10,-1,-58);
+	spikes();
+	glPopMatrix();
+	glPushMatrix();
+	glTranslatef(-11, -1, -37);
+	spikes();
+	glPopMatrix();
+}
 
 void drawLevel1Walls() {
 
@@ -376,12 +459,15 @@ void renderLevel1() {
 
 	drawLevel1Walls();
 
+	bushes();
+
 }
 
 void renderLevel2() {
 
 	drawLevel2Walls();
-
+	drawSpikes();
+	
 }
 
 
@@ -556,10 +642,12 @@ void LoadAssets()
 
 	model_grassWall.Load("models/grassWall/wall.3DS");
 
-
+	
 	tex_brickground.Load("Textures/brickFloor.bmp");
 	tex_ground.Load("Textures/grass.bmp");
 	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
+	loadBMP(&bushtex, "Textures/bush.bmp", true);
+	loadBMP(&spiketex, "Textures/spikes.bmp", true);
 }
 
 //=======================================================================
