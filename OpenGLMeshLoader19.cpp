@@ -17,7 +17,16 @@ GLdouble fovy = 45.0;
 GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 200;
+int playerX = -18;
+int playerY = 1;
+int playerZ = 17;
+int playerR = 270;
+int step = 1;
 
+bool moveright = true;
+bool moveleft = true;
+bool moveup = true;
+bool movedown = true;
 class Vector
 {
 public:
@@ -44,8 +53,8 @@ public:
 
 // so to move it forward i translate the eye and at at the same time
 
-Vector Eye(0, 18,40 );
-Vector At(0, 0, 20);
+Vector Eye(0, 30,15 );
+Vector At(0, 0,0);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -57,7 +66,9 @@ Model_3DS model_annie;
 //--Bassel
 Model_3DS model_grassWall;
 Model_3DS model_brickWall;
-
+//--Arwa
+Model_3DS model_bear;
+Model_3DS model_apple;
 //---
 // Textures
 GLTexture tex_ground;
@@ -153,7 +164,27 @@ void myInit(void)
 
 	glEnable(GL_NORMALIZE);
 }
-
+void spe(int k, int x0, int y0) // keyboard special key function takes 3 parameters								// int k: is the special key pressed such as the keyboard arrows the f1,2,3 and so on
+{
+	if (k == GLUT_KEY_RIGHT && moveright) { //if the right arrow is pressed, then the object will be translated in the x axis by 10. (moving right)
+		playerR = 270;
+		playerX += step;
+	}
+	if (k == GLUT_KEY_LEFT && moveleft)
+	{ //if the left arrow is pressed, then the object will be translated in the x axis by -10. (moving left)
+		playerR = 90;
+		playerX -= step;
+	}
+	if (k == GLUT_KEY_UP && moveup) { //if the up arrow is pressed, then the object will be translated in the y axis by 10. (moving upwords)
+		playerR = 0;
+		playerZ -= step;
+	}
+	if (k == GLUT_KEY_DOWN && movedown) { //if the down arrow is pressed, then the object will be translated in the y axis by -10. (moving downwords)
+		playerR = 180;
+		playerZ += step;
+	}
+	glutPostRedisplay(); //redisplay to update the screen with the changes
+}
 //=======================================================================
 // Render Ground Function
 //=======================================================================
@@ -469,6 +500,21 @@ void renderLevel2() {
 	drawSpikes();
 	
 }
+void drawPlayer() {
+	   glPushMatrix();
+	   glTranslated(playerX,playerY,playerZ);
+		glScalef(0.1, 0.1, 0.1);
+		glRotatef(playerR, 0,1, 0);
+		model_bear.Draw();
+		glPopMatrix();
+}
+void drawGoal() {
+	glPushMatrix();
+	glTranslated(0,5,0);
+	glScalef(1, 1, 1);
+	model_apple.Draw();
+	glPopMatrix();
+}
 
 
 void myDisplay(void)
@@ -485,8 +531,8 @@ void myDisplay(void)
 	// Draw Ground
 	RenderGround();
 
-
-
+	drawPlayer();
+	drawGoal();
 	renderLevel1();
 
 	renderLevel2();
@@ -517,7 +563,7 @@ void myDisplay(void)
 //=======================================================================
 void myKeyboard(unsigned char button, int x, int y)
 {
-
+	
 	switch (button)
 	{
 	case'a':
@@ -538,6 +584,7 @@ void myKeyboard(unsigned char button, int x, int y)
 		At.z += 0.2;
 		break;
 
+
 	case GLUT_KEY_F1:
 		exit(0);
 		break;
@@ -547,7 +594,7 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	glLoadIdentity();	//Clear Model_View Matrix
 
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+	gluLookAt(Eye.x,Eye.y,Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
 
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -641,7 +688,7 @@ void LoadAssets()
 	model_brickWall.Load("models/brickWall/wall.3DS");
 
 	model_grassWall.Load("models/grassWall/wall.3DS");
-
+	model_bear.Load("models/ted-bear/ted.3ds");
 	
 	tex_brickground.Load("Textures/brickFloor.bmp");
 	tex_ground.Load("Textures/grass.bmp");
@@ -661,13 +708,14 @@ void main(int argc, char** argv)
 
 	glutInitWindowSize(WIDTH, HEIGHT);
 
-	glutInitWindowPosition(100, 150);
+	glutInitWindowPosition(0, 0);
 
 	glutCreateWindow(title);
 
 	glutDisplayFunc(myDisplay);
 
 	glutKeyboardFunc(myKeyboard);
+	glutSpecialFunc(spe);
 
 	glutMotionFunc(myMotion);
 
