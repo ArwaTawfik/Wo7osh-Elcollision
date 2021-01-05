@@ -69,6 +69,9 @@ Model_3DS model_brickWall;
 //--Arwa
 Model_3DS model_bear;
 Model_3DS model_apple;
+//salma
+Model_3DS model_coin;
+
 //---
 // Textures
 GLTexture tex_ground;
@@ -164,24 +167,57 @@ void myInit(void)
 
 	glEnable(GL_NORMALIZE);
 }
-void spe(int k, int x0, int y0) // keyboard special key function takes 3 parameters								// int k: is the special key pressed such as the keyboard arrows the f1,2,3 and so on
-{
-	if (k == GLUT_KEY_RIGHT && moveright) { //if the right arrow is pressed, then the object will be translated in the x axis by 10. (moving right)
-		playerR = 270;
-		playerX += step;
-	}
-	if (k == GLUT_KEY_LEFT && moveleft)
-	{ //if the left arrow is pressed, then the object will be translated in the x axis by -10. (moving left)
-		playerR = 90;
-		playerX -= step;
-	}
-	if (k == GLUT_KEY_UP && moveup) { //if the up arrow is pressed, then the object will be translated in the y axis by 10. (moving upwords)
+void moveUp() {
+	if (playerZ>-59) {
 		playerR = 0;
 		playerZ -= step;
 	}
-	if (k == GLUT_KEY_DOWN && movedown) { //if the down arrow is pressed, then the object will be translated in the y axis by -10. (moving downwords)
+	else {
+		//collision
+	}
+}
+void moveDown() {
+	if (playerZ < 19) {
 		playerR = 180;
 		playerZ += step;
+	}
+	else {
+		//collision
+	}
+}
+void moveLeft() {
+	if (playerX > -19) {
+		playerR = 90;
+		playerX -= step;
+	}
+	else {
+		//collision
+	}
+}
+void moveRight() {
+	if (playerX < 19) {
+		playerR = 270;
+		playerX += step;
+	}
+	else {
+		//collision
+	}
+}
+
+void spe(int k, int x0, int y0) // keyboard special key function takes 3 parameters								// int k: is the special key pressed such as the keyboard arrows the f1,2,3 and so on
+{
+	if (k == GLUT_KEY_RIGHT && moveright) { //if the right arrow is pressed, then the object will be translated in the x axis by 10. (moving right)
+		moveRight();
+	}
+	if (k == GLUT_KEY_LEFT && moveleft)
+	{ //if the left arrow is pressed, then the object will be translated in the x axis by -10. (moving left)
+		moveLeft();
+	}
+	if (k == GLUT_KEY_UP && moveup) { //if the up arrow is pressed, then the object will be translated in the y axis by 10. (moving upwords)
+		moveUp();
+	}
+	if (k == GLUT_KEY_DOWN && movedown) { //if the down arrow is pressed, then the object will be translated in the y axis by -10. (moving downwords)
+		moveDown();
 	}
 	glutPostRedisplay(); //redisplay to update the screen with the changes
 }
@@ -400,6 +436,27 @@ void grassBorders() {
 	}
 }
 
+void coin(int x, int z) {
+
+	glPushMatrix();
+	glTranslated(x, 1, z);
+	glScaled(0.3, 0.3, 0.3);
+	model_coin.Draw();
+	glPopMatrix();
+	
+}
+void drawCoins() {
+	//level1 coins
+	coin(3,4);
+	coin(-8,17);
+	coin(4,-11);
+	//level2 coins
+	coin(3, -36);
+	coin(15, -57);
+	coin(4, -43);
+	
+}
+
 void drawBrickWalls(int noWall,int z) {
 	//noWall is where I dont want a wall to block path
 
@@ -517,6 +574,7 @@ void drawGoal() {
 }
 
 
+
 void myDisplay(void)
 {
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -536,7 +594,7 @@ void myDisplay(void)
 	renderLevel1();
 
 	renderLevel2();
-
+	drawCoins();
 	// Draw Tree Model
 	/*glPushMatrix();
 	glTranslatef(10, 0, 0);
@@ -689,7 +747,8 @@ void LoadAssets()
 
 	model_grassWall.Load("models/grassWall/wall.3DS");
 	model_bear.Load("models/ted-bear/ted.3ds");
-	
+	model_coin.Load("models/coin/Coin.3ds");
+
 	tex_brickground.Load("Textures/brickFloor.bmp");
 	tex_ground.Load("Textures/grass.bmp");
 	loadBMP(&tex, "Textures/blu-sky-3.bmp", true);
