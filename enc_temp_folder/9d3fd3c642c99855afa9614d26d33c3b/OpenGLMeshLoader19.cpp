@@ -674,7 +674,7 @@ void checkBush() {
 }
 void checkSpike() {
 	boolean alreadythere = false;
-	if (withinRange(10, -55, 1) || withinRange(-11, -32, 1)) {
+	if (withinRange(10, -58, 1) || withinRange(-11, -37, 1)) {
 		if (!alreadythere)
 		dead = true;
 		alreadythere = true;
@@ -727,7 +727,7 @@ void myDisplay(void)
 	}
 	else
 	{
-		glClearColor(1.0f, 0.6f, 0.0f, 0.0);
+		glClearColor(1.0f, 0.6f, 1.0f, 0.0);
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
