@@ -24,10 +24,11 @@ int playerR = 270;
 int step = 1;
 
 BOOLEAN dead = false;
-BOOLEAN lvl1 = true;
-BOOLEAN lvl2 = false;
+BOOLEAN lvl1_passed = false;
+BOOLEAN lvl2_passed = false;
 int score = 0;
-int timeout = 3000;
+int timeout = 800;
+int celebrate_time = 10;
 bool coinpresent[6] = { true, true, true, true, true, true };
 
 bool moveright = true;
@@ -674,7 +675,7 @@ void checkBush() {
 }
 void checkSpike() {
 	boolean alreadythere = false;
-	if (withinRange(10, -55, 1) || withinRange(-11, -32, 1)) {
+	if (withinRange(15, -50, 1) || withinRange(-6, -30, 1)) {
 		if (!alreadythere)
 		dead = true;
 		alreadythere = true;
@@ -683,13 +684,24 @@ void checkSpike() {
 		alreadythere = false;
 	}
 }
-
+void checkLvl1() {
+	if (withinRange(-10, -18, 2)) {
+		lvl1_passed = true;
+	}
+}
+void checkLvl2() {
+	if (withinRange(18, -58, 2)) {
+		lvl2_passed = true;
+	}
+}
 void myDisplay(void)
 {
 	checkBush();
 	checkCoin();
 	checkSpike();
-	if (!dead && timeout > 0) {
+	checkLvl1();
+	checkLvl2();
+	if (!dead && timeout > 0 && !lvl2_passed && (celebrate_time==10 || celebrate_time<1)) {
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
@@ -731,15 +743,22 @@ void myDisplay(void)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
-			char* p0s[20];
-			sprintf((char*)p0s, "YOU Lost!");
-			print(Eye.x, Eye.y , (char*)p0s);
+			if (lvl2_passed || lvl1_passed) {
+				char* p0s[20];
+				sprintf((char*)p0s, "YOU WON!!!");
+				print(At.x, At.y, (char*)p0s);
+			}
+			else {
+				char* p0s[20];
+				sprintf((char*)p0s, "You Lost!");
+				print(At.x, At.y, (char*)p0s);
+			}
 
 		}
 		else {
 			char* p0s[20];
 			sprintf((char*)p0s, "You ran out of time!");
-			print(Eye.x, Eye.y, (char*)p0s);
+			print(At.x, At.y, (char*)p0s);
 		}
 	}
 
@@ -889,6 +908,9 @@ void LoadAssets()
 
 void timer(int val) {
 	
+	if (lvl1_passed && !lvl2_passed) {
+		celebrate_time--;
+	}
 	timeout--;
 	glutPostRedisplay();
 	glutTimerFunc(100, timer, 0);
