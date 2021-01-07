@@ -223,7 +223,7 @@ void moveUp() {
 		playerZ -= step;
 	}
 	else {
-		//collision
+		//collision sound
 	}
 }
 void moveDown() {
@@ -232,7 +232,7 @@ void moveDown() {
 		playerZ += step;
 	}
 	else {
-		//collision
+		//collision sound
 	}
 }
 void moveLeft() {
@@ -241,7 +241,7 @@ void moveLeft() {
 		playerX -= step;
 	}
 	else {
-		//collision
+		//collision sound
 	}
 }
 void moveRight() {
@@ -250,7 +250,7 @@ void moveRight() {
 		playerX += step;
 	}
 	else {
-		//collision
+		//collision sound
 	}
 }
 
@@ -638,26 +638,32 @@ void checkCoin() {
 	//boolean alreadythere = false;
 	if (withinRange(3, 4, 2)) {
 		score += 50;
+		//coin sound
 		coinpresent[0] = false;
 	}
 	if (withinRange(-8, 17, 2)) {
 		score += 50;
+		//coin sound
 		coinpresent[1] = false;
 	}
 	if (withinRange(4, -11, 2)) {
 		score += 50;
+		//coin sound
 		coinpresent[2] = false;
 	}
 	if (withinRange(3, -36, 2)) {
 		score += 50;
+		//coin sound
 		coinpresent[3] = false;
 	}
 	if (withinRange(15, -57, 2)) {
 		score += 50;
+		//coin sound
 		coinpresent[4] = false;
 	}
 	if (withinRange(4, -43, 2)) {
 		score += 50;
+		//coin sound
 		coinpresent[5] = false;
 	}
 	
@@ -665,8 +671,10 @@ void checkCoin() {
 void checkBush() {
 	boolean alreadythere = false;
 	if (withinRange(9, 3, 2) || withinRange(-12, -10, 2)) {
-		if (!alreadythere)
-		timeout -= 50;
+		if (!alreadythere) {
+			//bush sound
+			timeout -= 50;
+		}
 		alreadythere = true;
 	}
 	else {
@@ -676,8 +684,10 @@ void checkBush() {
 void checkSpike() {
 	boolean alreadythere = false;
 	if (withinRange(15, -50, 1) || withinRange(-6, -30, 1)) {
-		if (!alreadythere)
-		dead = true;
+		if (!alreadythere) {
+			//spike sound
+			dead = true;
+		}
 		alreadythere = true;
 	}
 	else {
@@ -744,11 +754,13 @@ void myDisplay(void)
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
 			if (lvl2_passed || lvl1_passed) {
+				//win sound
 				char* p0s[20];
 				sprintf((char*)p0s, "YOU WON!!!");
 				print(At.x, At.y, (char*)p0s);
 			}
 			else {
+				//lose sound
 				char* p0s[20];
 				sprintf((char*)p0s, "You Lost!");
 				print(At.x, At.y, (char*)p0s);
@@ -756,6 +768,7 @@ void myDisplay(void)
 
 		}
 		else {
+			//lose sound
 			char* p0s[20];
 			sprintf((char*)p0s, "You ran out of time!");
 			print(At.x, At.y, (char*)p0s);
