@@ -22,10 +22,11 @@ GLdouble aspectRatio = (GLdouble)WIDTH / (GLdouble)HEIGHT;
 GLdouble zNear = 0.1;
 GLdouble zFar = 200;
 int playerX = -18;
-int playerY = 1;
+int playerY = 0;
 int playerZ = 17;
 int playerR = 270;
 int step = 1;
+int cameramode = 1;
 
 BOOLEAN dead = false;
 BOOLEAN lvl1_passed = false;
@@ -86,47 +87,6 @@ public:
 		center = Vector3f(centerX, centerY, centerZ);
 		up = Vector3f(upX, upY, upZ);
 	}
-
-	void moveX(float d) {
-		Vector3f right = up.cross(center - eye).unit();
-		eye = eye + right * d;
-		center = center + right * d;
-	}
-
-	void moveY(float d) {
-		eye = eye + up.unit() * d;
-		center = center + up.unit() * d;
-	}
-
-	void moveZ(float d) {
-		Vector3f view = (center - eye).unit();
-		eye = eye + view * d;
-		center = center + view * d;
-	}
-
-	void rotateX(float a) {
-		Vector3f view = (center - eye).unit();
-		Vector3f right = up.cross(view).unit();
-		view = view * cos(DEG2RAD(a)) + up * sin(DEG2RAD(a));
-		up = view.cross(right);
-		center = eye + view;
-	}
-
-	void rotateY(float a) {
-		Vector3f view = (center - eye).unit();
-		Vector3f right = up.cross(view).unit();
-		view = view * cos(DEG2RAD(a)) + right * sin(DEG2RAD(a));
-		right = view.cross(up);
-		center = eye + view;
-	}
-
-	void look() {
-		gluLookAt(
-			eye.x, eye.y, eye.z,
-			center.x, center.y, center.z,
-			up.x, up.y, up.z
-		);
-	}
 };
 
 Camera camera;
@@ -139,39 +99,18 @@ Camera camera;
 
 
 
-
-
-class Vector
-{
-public:
-	GLdouble x, y, z;
-	Vector() {}
-	Vector(GLdouble _x, GLdouble _y, GLdouble _z) : x(_x), y(_y), z(_z) {}
-	//================================================================================================//
-	// Operator Overloading; In C++ you can override the behavior of operators for you class objects. //
-	// Here we are overloading the += operator to add a given value to all vector coordinates.        //
-	//================================================================================================//
-	void operator +=(float value)
-	{
-		x += value;
-		y += value;
-		z += value;
-	}
-};
-
-
-
 //Note on camera:
-//--Eye is where the camera itself is
+//--eye is where the camera itself is
 //--AT is the point where the camera is looking at
 
 // so to move it forward i translate the eye and at at the same time
 
-Vector Eye(0, 30,15 );
-Vector center(0, 0,0);
-Vector Up(0, 1, 0);
+Vector3f eye(-17, 1,17 );
+Vector3f center(0, 1,17);
+Vector3f up(0, 1, 0);
 
 int cameraZoom = 0;
+int cameraZoomx = 0;
 
 // Model Variables
 Model_3DS model_house;
@@ -193,6 +132,48 @@ GLTexture tex_brickground;
 GLTexture tex_grasswall;
 GLTexture tex_bush;
 
+//----------------------------------------Camera Functions---------------------------------------------
+void moveX(float d) {
+	Vector3f right = up.cross(center - eye).unit();
+	eye = eye + right * d;
+	center = center + right * d;
+}
+
+void moveY(float d) {
+	eye = eye + up.unit() * d;
+	center = center + up.unit() * d;
+}
+
+void moveZ(float d) {
+	Vector3f view = (center - eye).unit();
+	eye = eye + view * d;
+	center = center + view * d;
+}
+
+void rotateX(float a) {
+	Vector3f view = (center - eye).unit();
+	Vector3f right = up.cross(view).unit();
+	view = view * cos(DEG2RAD(a)) + up * sin(DEG2RAD(a));
+	//up = view.cross(right);
+	center = eye + view;
+}
+
+void rotateY(float a) {
+	Vector3f view = (center - eye).unit();
+	Vector3f right = up.cross(view).unit();
+	view = view * cos(DEG2RAD(a)) + right * sin(DEG2RAD(a));
+	right = view.cross(up);
+	center = eye + view;
+}
+
+void look() {
+	gluLookAt(
+		eye.x, eye.y, eye.z,
+		center.x, center.y, center.z,
+		up.x, up.y, up.z
+	);
+}
+//-----------------------------------------------------------------------------------------------------------------------
 
 //=======================================================================
 // Lighting Configuration Function
@@ -261,7 +242,7 @@ void myInit(void)
 	//*******************************************************************************************//
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(Eye.x, Eye.y, Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);
 	//*******************************************************************************************//
 	// EYE (ex, ey, ez): defines the location of the camera.									 //
 	// AT (ax, ay, az):	 denotes the direction where the camera is aiming at.					 //
@@ -301,7 +282,6 @@ void print(int x, int y, char* string)
 }
 
 
-
 //int wallsZ[12] = { 30,23,16,9,2,-4.5,0,-7,-14,-21,-28,-35 };
 int wallsZ[11] = { 15,8,1,-6,-13,-19.5,-25,-32,-39,-46,-53 };
 int found(int z) {
@@ -328,37 +308,77 @@ void moveUp() {
 	playerR = 0;
 	if (playerZ>-59 && (found(playerZ-step)==-1 || canPass(playerX, playerZ-step))) {
 		playerZ -= step;
+		moveX(1.0);
 	}
 	else {
 		PS("sfx/slam.wav");
 	}
+
+	glLoadIdentity();	//Clear Model_View Matrix
+
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
+
+	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glutPostRedisplay();
 }
 void moveDown() {
 		playerR = 180;
 	if (playerZ < 19 && (found(playerZ+step)==-1 || canPass(playerX, playerZ + step))) {
 		playerZ += step;
+		moveX(-1.0);
 	}
 	else {
 		PS("sfx/slam.wav");
 	}
+
+	glLoadIdentity();	//Clear Model_View Matrix
+
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
+
+	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glutPostRedisplay();
 }
 void moveLeft() {
 		playerR = 90;
 	if (playerX > -19 && found(playerZ) == -1) {
 		playerX -= step;
+		moveZ(-1.0);
 	}
 	else {
 		PS("sfx/slam.wav");
 	}
+
+	glLoadIdentity();	//Clear Model_View Matrix
+
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
+
+	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glutPostRedisplay();	//Re-draw scene 
 }
 void moveRight() {
 		playerR = 270;
 	if (playerX < 19 && found(playerZ) == -1) {
 		playerX += step;
+		moveZ(1.0);
 	}
 	else {
 		PS("sfx/slam.wav");
 	}
+
+	glLoadIdentity();	//Clear Model_View Matrix
+
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
+
+	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+
+	glutPostRedisplay();	//Re-draw scene 
 }
 
 void spe(int k, int x0, int y0) // keyboard special key function takes 3 parameters								// int k: is the special key pressed such as the keyboard arrows the f1,2,3 and so on
@@ -910,20 +930,20 @@ void myKeyboard(unsigned char button, int x, int y)
 	switch (button)
 	{
 	case'a':
-			Eye.x -= 0.2;
-			center.x -= 0.2;
-			break;
+		eye.x -= 0.2;
+		center.x -= 0.2;
+		break;
 	case'd':
-		Eye.x += 0.2;
+		eye.x += 0.2;
 		center.x += 0.2;
 		break;
 		
 	case'w':
-		Eye.z -= 0.2;
+		eye.z -= 0.2;
 		center.z -= 0.2;
 		break;
 	case's':
-		Eye.z += 0.2;
+		eye.z += 0.2;
 		center.z += 0.2;
 		break;
 
@@ -935,9 +955,23 @@ void myKeyboard(unsigned char button, int x, int y)
 		break;
 	}
 
+	if (button == '1'&&cameramode==3)
+	{
+			eye.y = eye.y - 0.5;
+			eye.x = eye.x + 4;
+			center.y = center.y - 0.5;
+			cameramode = 1;
+		
+	}
+	if (button == '3'&&cameramode==1) {
+		eye.y = eye.y + 0.5;
+		eye.x = eye.x - 4;
+		center.y = center.y + 0.5;
+		cameramode = 3;
+	}
 	glLoadIdentity();	//Clear Model_View Matrix
 
-	gluLookAt(Eye.x,Eye.y,Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+	gluLookAt(eye.x,eye.y,eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -953,23 +987,30 @@ void myKeyboard(unsigned char button, int x, int y)
 void myMotion(int x, int y)
 {
 	y = HEIGHT - y;
+	x = WIDTH - x;
 
 	if (cameraZoom - y > 0)
 	{
-		Eye.z += -0.1;
-		center.z += -0.1;
+		//rotateX(0.1);
 	}
 	else
 	{
-		Eye.z += 0.1;
-		center.z +=0.1;
+		//rotateX(-0.1);
+	}
+	if (cameraZoomx - x > 0)
+	{
+		//rotateY(0.5);
+	}
+	else
+	{
+		//rotateY(-0.5);
 	}
 
 	cameraZoom = y;
-
+	cameraZoomx = x;
 	glLoadIdentity();	//Clear Model_View Matrix
 
-	gluLookAt(Eye.x, Eye.y, Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -982,39 +1023,8 @@ void myMotion(int x, int y)
 //=======================================================================
 int pasty = 0;
 int pastx = 0;
-void myMouse(int button, int state, int x, int y)
-{
-	y = HEIGHT - y;
 
-	if (state == GLUT_DOWN)
-	{
-		cameraZoom = y;
-	}
 
-	pasty = y;
-
-}
-
-void Special(int key, int x, int y) {
-	float a = 1.0;
-
-	switch (key) {
-	case GLUT_KEY_UP:
-		camera.rotateX(a);
-		break;
-	case GLUT_KEY_DOWN:
-		camera.rotateX(-a);
-		break;
-	case GLUT_KEY_LEFT:
-		camera.rotateY(a);
-		break;
-	case GLUT_KEY_RIGHT:
-		camera.rotateY(-a);
-		break;
-	}
-
-	glutPostRedisplay();
-}
 //=======================================================================
 // Reshape Function
 //=======================================================================
@@ -1038,13 +1048,20 @@ void myReshape(int w, int h)
 	// go back to modelview matrix so we can move the objects about
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(Eye.x, Eye.y, Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);
+	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);
 }
 
 //=======================================================================
 // Assets Loading Function
 //=======================================================================
 
+void myMouse(int button, int state, int x, int y)
+{
+
+	
+
+
+}
 void LoadAssets()
 {
 	// Loading Model files
