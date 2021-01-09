@@ -2,6 +2,10 @@
 #include "Model_3DS.h"
 #include "GLTexture.h"
 #include <glut.h>
+#include <Windows.h>
+#include <math.h>
+
+#define DEG2RAD(a) (a * 0.0174532925)
 
 int WIDTH = 1280;
 int HEIGHT = 720;
@@ -35,6 +39,108 @@ bool moveright = true;
 bool moveleft = true;
 bool moveup = true;
 bool movedown = true;
+
+
+//---------------------------------------------------------------Bassel------------------------------------------------
+class Vector3f {
+public:
+	float x, y, z;
+
+	Vector3f(float _x = 0.0f, float _y = 0.0f, float _z = 0.0f) {
+		x = _x;
+		y = _y;
+		z = _z;
+	}
+
+	Vector3f operator+(Vector3f& v) {
+		return Vector3f(x + v.x, y + v.y, z + v.z);
+	}
+
+	Vector3f operator-(Vector3f& v) {
+		return Vector3f(x - v.x, y - v.y, z - v.z);
+	}
+
+	Vector3f operator*(float n) {
+		return Vector3f(x * n, y * n, z * n);
+	}
+
+	Vector3f operator/(float n) {
+		return Vector3f(x / n, y / n, z / n);
+	}
+
+	Vector3f unit() {
+		return *this / sqrt(x * x + y * y + z * z);
+	}
+
+	Vector3f cross(Vector3f v) {
+		return Vector3f(y * v.z - z * v.y, z * v.x - x * v.z, x * v.y - y * v.x);
+	}
+};
+
+class Camera {
+public:
+	Vector3f eye, center, up;
+
+	Camera(float eyeX = 1.0f, float eyeY = 1.0f, float eyeZ = 1.0f, float centerX = 0.0f, float centerY = 0.0f, float centerZ = 0.0f, float upX = 0.0f, float upY = 1.0f, float upZ = 0.0f) {
+		eye = Vector3f(eyeX, eyeY, eyeZ);
+		center = Vector3f(centerX, centerY, centerZ);
+		up = Vector3f(upX, upY, upZ);
+	}
+
+	void moveX(float d) {
+		Vector3f right = up.cross(center - eye).unit();
+		eye = eye + right * d;
+		center = center + right * d;
+	}
+
+	void moveY(float d) {
+		eye = eye + up.unit() * d;
+		center = center + up.unit() * d;
+	}
+
+	void moveZ(float d) {
+		Vector3f view = (center - eye).unit();
+		eye = eye + view * d;
+		center = center + view * d;
+	}
+
+	void rotateX(float a) {
+		Vector3f view = (center - eye).unit();
+		Vector3f right = up.cross(view).unit();
+		view = view * cos(DEG2RAD(a)) + up * sin(DEG2RAD(a));
+		up = view.cross(right);
+		center = eye + view;
+	}
+
+	void rotateY(float a) {
+		Vector3f view = (center - eye).unit();
+		Vector3f right = up.cross(view).unit();
+		view = view * cos(DEG2RAD(a)) + right * sin(DEG2RAD(a));
+		right = view.cross(up);
+		center = eye + view;
+	}
+
+	void look() {
+		gluLookAt(
+			eye.x, eye.y, eye.z,
+			center.x, center.y, center.z,
+			up.x, up.y, up.z
+		);
+	}
+};
+
+Camera camera;
+
+
+//---------------------------------------------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
 class Vector
 {
 public:
@@ -62,7 +168,7 @@ public:
 // so to move it forward i translate the eye and at at the same time
 
 Vector Eye(0, 30,15 );
-Vector At(0, 0,0);
+Vector center(0, 0,0);
 Vector Up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -146,21 +252,16 @@ void myInit(void)
 	glClearColor(0.0, 0.0, 0.0, 0.0);
 
 	glMatrixMode(GL_PROJECTION);
-
 	glLoadIdentity();
-
 	gluPerspective(fovy, aspectRatio, zNear, zFar);
 	//*******************************************************************************************//
 	// fovy:			Angle between the bottom and top of the projectors, in degrees.			 //
 	// aspectRatio:		Ratio of width to height of the clipping plane.							 //
 	// zNear and zFar:	Specify the front and back clipping planes distances from camera.		 //
 	//*******************************************************************************************//
-
 	glMatrixMode(GL_MODELVIEW);
-
 	glLoadIdentity();
-
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+	gluLookAt(Eye.x, Eye.y, Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);
 	//*******************************************************************************************//
 	// EYE (ex, ey, ez): defines the location of the camera.									 //
 	// AT (ax, ay, az):	 denotes the direction where the camera is aiming at.					 //
@@ -174,6 +275,11 @@ void myInit(void)
 	glEnable(GL_DEPTH_TEST);
 
 	glEnable(GL_NORMALIZE);
+}
+
+
+void PS(char* sound) {
+	PlaySound(TEXT(sound), NULL, SND_ASYNC);
 }
 
 
@@ -193,6 +299,7 @@ void print(int x, int y, char* string)
 		glutBitmapCharacter(GLUT_BITMAP_TIMES_ROMAN_24, string[i]);
 	}
 }
+
 
 
 //int wallsZ[12] = { 30,23,16,9,2,-4.5,0,-7,-14,-21,-28,-35 };
@@ -223,7 +330,7 @@ void moveUp() {
 		playerZ -= step;
 	}
 	else {
-		//collision sound
+		PS("sfx/slam.wav");
 	}
 }
 void moveDown() {
@@ -232,7 +339,7 @@ void moveDown() {
 		playerZ += step;
 	}
 	else {
-		//collision sound
+		PS("sfx/slam.wav");
 	}
 }
 void moveLeft() {
@@ -241,7 +348,7 @@ void moveLeft() {
 		playerX -= step;
 	}
 	else {
-		//collision sound
+		PS("sfx/slam.wav");
 	}
 }
 void moveRight() {
@@ -250,7 +357,7 @@ void moveRight() {
 		playerX += step;
 	}
 	else {
-		//collision sound
+		PS("sfx/slam.wav");
 	}
 }
 
@@ -638,60 +745,66 @@ void checkCoin() {
 	//boolean alreadythere = false;
 	if (withinRange(3, 4, 2)) {
 		score += 50;
-		//coin sound
+		if (coinpresent[0])
+			PS("sfx//coin.wav");
 		coinpresent[0] = false;
 	}
 	if (withinRange(-8, 17, 2)) {
 		score += 50;
-		//coin sound
+		if (coinpresent[1])
+			PS("sfx//coin.wav");
 		coinpresent[1] = false;
 	}
 	if (withinRange(4, -11, 2)) {
 		score += 50;
-		//coin sound
+		if (coinpresent[2])
+			PS("sfx//coin.wav");
 		coinpresent[2] = false;
 	}
 	if (withinRange(3, -36, 2)) {
 		score += 50;
-		//coin sound
+		if (coinpresent[3])
+			PS("sfx//coin.wav");
 		coinpresent[3] = false;
 	}
 	if (withinRange(15, -57, 2)) {
 		score += 50;
-		//coin sound
+		if (coinpresent[4])
+			PS("sfx//coin.wav");
 		coinpresent[4] = false;
 	}
 	if (withinRange(4, -43, 2)) {
 		score += 50;
-		//coin sound
+		if(coinpresent[5])
+			PS("sfx//coin.wav");
 		coinpresent[5] = false;
 	}
 	
 }
+boolean bushalreadythere = false;
 void checkBush() {
-	boolean alreadythere = false;
 	if (withinRange(9, 3, 2) || withinRange(-12, -10, 2)) {
-		if (!alreadythere) {
-			//bush sound
+		if (!bushalreadythere) {
+			PS("sfx//bush.wav");
 			timeout -= 50;
 		}
-		alreadythere = true;
+		bushalreadythere = true;
 	}
 	else {
-		alreadythere = false;
+		bushalreadythere = false;
 	}
 }
+boolean spikealreadythere = false;
 void checkSpike() {
-	boolean alreadythere = false;
 	if (withinRange(15, -50, 1) || withinRange(-6, -30, 1)) {
-		if (!alreadythere) {
-			//spike sound
+		if (!spikealreadythere) {
+			PS("sfx//tomhurt.wav");
 			dead = true;
 		}
-		alreadythere = true;
+		spikealreadythere = true;
 	}
 	else {
-		alreadythere = false;
+		spikealreadythere = false;
 	}
 }
 void checkLvl1() {
@@ -704,6 +817,10 @@ void checkLvl2() {
 		lvl2_passed = true;
 	}
 }
+
+bool l = true;
+bool w1 = true;
+bool w2 = true;
 void myDisplay(void)
 {
 	checkBush();
@@ -715,11 +832,11 @@ void myDisplay(void)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
-
 		GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
 		GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
 		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
+
 
 		// Draw Ground
 		RenderGround();
@@ -730,18 +847,6 @@ void myDisplay(void)
 
 		renderLevel2();
 		drawCoins();
-		// Draw Tree Model
-		/*glPushMatrix();
-		glTranslatef(10, 0, 0);
-		glScalef(0.7, 0.7, 0.7);
-		model_tree.Draw();
-		glPopMatrix();*/
-
-		// Draw house Model
-		/*glPushMatrix();
-		glRotatef(90.f, 1, 0, 0);
-		model_house.Draw();
-		glPopMatrix();*/
 
 
 		//sky box
@@ -753,25 +858,43 @@ void myDisplay(void)
 
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
-			if (lvl2_passed || lvl1_passed) {
-				//win sound
+			if (lvl1_passed||lvl2_passed) {
+
+				if (lvl1_passed) {
+					if (w1) {
+						PS("sfx//mission1.wav");
+						w1 = false;
+					}
+				}
+				if (lvl2_passed) {
+					if (w2) {
+						PS("sfx//win.wav");
+						w2 = false;
+					}
+				}
+
 				char* p0s[20];
 				sprintf((char*)p0s, "YOU WON!!!");
-				print(At.x, At.y, (char*)p0s);
-			}
-			else {
-				//lose sound
-				char* p0s[20];
-				sprintf((char*)p0s, "You Lost!");
-				print(At.x, At.y, (char*)p0s);
-			}
+				print(center.x, center.y, (char*)p0s);
+			}else
+					if (l) {
+						PS("sfx//lose.wav");
+						l = false;
+					}
+					char* p0s[20];
+					sprintf((char*)p0s, "You Lost!");
+					print(center.x, center.y, (char*)p0s);
+				
 
 		}
 		else {
-			//lose sound
+			if (l) {
+				PS("sfx//lose.wav");
+				l = false;
+			}
 			char* p0s[20];
 			sprintf((char*)p0s, "You ran out of time!");
-			print(At.x, At.y, (char*)p0s);
+			print(center.x, center.y, (char*)p0s);
 		}
 	}
 
@@ -788,20 +911,20 @@ void myKeyboard(unsigned char button, int x, int y)
 	{
 	case'a':
 			Eye.x -= 0.2;
-			At.x -= 0.2;
+			center.x -= 0.2;
 			break;
 	case'd':
 		Eye.x += 0.2;
-		At.x += 0.2;
+		center.x += 0.2;
 		break;
 		
 	case'w':
 		Eye.z -= 0.2;
-		At.z -= 0.2;
+		center.z -= 0.2;
 		break;
 	case's':
 		Eye.z += 0.2;
-		At.z += 0.2;
+		center.z += 0.2;
 		break;
 
 
@@ -814,7 +937,7 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	glLoadIdentity();	//Clear Model_View Matrix
 
-	gluLookAt(Eye.x,Eye.y,Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+	gluLookAt(Eye.x,Eye.y,Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
 
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -834,19 +957,19 @@ void myMotion(int x, int y)
 	if (cameraZoom - y > 0)
 	{
 		Eye.z += -0.1;
-		At.z += -0.1;
+		center.z += -0.1;
 	}
 	else
 	{
 		Eye.z += 0.1;
-		At.z +=0.1;
+		center.z +=0.1;
 	}
 
 	cameraZoom = y;
 
 	glLoadIdentity();	//Clear Model_View Matrix
 
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
+	gluLookAt(Eye.x, Eye.y, Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);	//Setup Camera with modified paramters
 
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -857,6 +980,8 @@ void myMotion(int x, int y)
 //=======================================================================
 // Mouse Function
 //=======================================================================
+int pasty = 0;
+int pastx = 0;
 void myMouse(int button, int state, int x, int y)
 {
 	y = HEIGHT - y;
@@ -865,8 +990,31 @@ void myMouse(int button, int state, int x, int y)
 	{
 		cameraZoom = y;
 	}
+
+	pasty = y;
+
 }
 
+void Special(int key, int x, int y) {
+	float a = 1.0;
+
+	switch (key) {
+	case GLUT_KEY_UP:
+		camera.rotateX(a);
+		break;
+	case GLUT_KEY_DOWN:
+		camera.rotateX(-a);
+		break;
+	case GLUT_KEY_LEFT:
+		camera.rotateY(a);
+		break;
+	case GLUT_KEY_RIGHT:
+		camera.rotateY(-a);
+		break;
+	}
+
+	glutPostRedisplay();
+}
 //=======================================================================
 // Reshape Function
 //=======================================================================
@@ -890,7 +1038,7 @@ void myReshape(int w, int h)
 	// go back to modelview matrix so we can move the objects about
 	glMatrixMode(GL_MODELVIEW);
 	glLoadIdentity();
-	gluLookAt(Eye.x, Eye.y, Eye.z, At.x, At.y, At.z, Up.x, Up.y, Up.z);
+	gluLookAt(Eye.x, Eye.y, Eye.z, center.x, center.y, center.z, Up.x, Up.y, Up.z);
 }
 
 //=======================================================================
@@ -901,9 +1049,6 @@ void LoadAssets()
 {
 	// Loading Model files
 
-	//model_house.Load("Models/house/house.3DS");
-
-	//model_tree.Load("Models/tree/Tree1.3ds");
 
 	model_brickWall.Load("models/brickWall/wall.3DS");
 
@@ -944,6 +1089,8 @@ void main(int argc, char** argv)
 
 	glutCreateWindow(title);
 	glutTimerFunc(0, timer, 0);
+
+	//PS("sfx//win.wav");
 
 	glutDisplayFunc(myDisplay);
 
