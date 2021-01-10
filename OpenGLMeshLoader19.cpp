@@ -27,7 +27,6 @@ int playerZ = 17;
 int playerR = 270;
 int step = 1;
 int cameramode = 1;
-
 BOOLEAN dead = false;
 BOOLEAN lvl1_passed = false;
 BOOLEAN lvl2_passed = false;
@@ -242,12 +241,12 @@ void PS(char* sound) {
 }
 
 
-void print(int x, int y, char* string)
+void print(int x, int y,int z,  char* string)
 {
 	int len, i;
 
 	//set the position of the text in the window using the x and y coordinates
-	glRasterPos2f(x, y);
+	glRasterPos3f(x, y,z);
 
 	//get the length of the string to display
 	len = (int)strlen(string);
@@ -872,6 +871,8 @@ void checkLvl2() {
 bool l = true;
 bool w1 = true;
 bool w2 = true;
+int currz=center.z;;
+
 void myDisplay(void)
 {
 	checkBush();
@@ -880,14 +881,13 @@ void myDisplay(void)
 	checkLvl1();
 	checkLvl2();
 	if (!dead && timeout > 0 && !lvl2_passed && (celebrate_time==10 || celebrate_time<1)) {
-
+		currz = center.z;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		
 		GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
 		GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
 		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
 		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
-
 
 		// Draw Ground
 		RenderGround();
@@ -906,7 +906,6 @@ void myDisplay(void)
 	else
 	{
 		glClearColor(1.0f, 0.6f, 0.0f, 0.0);
-
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
 			if (lvl1_passed||lvl2_passed) {
@@ -926,7 +925,7 @@ void myDisplay(void)
 
 				char* p0s[20];
 				sprintf((char*)p0s, "YOU WON!!!");
-				print(center.x, center.y, (char*)p0s);
+				print(center.x, center.y,center.z, (char*)p0s);
 			}else
 					if (l) {
 						PS("sfx//lose.wav");
@@ -934,7 +933,7 @@ void myDisplay(void)
 					}
 					char* p0s[20];
 					sprintf((char*)p0s, "You Lost!");
-					print(center.x, center.y, (char*)p0s);
+					print(center.x, center.y, center.z,(char*)p0s);
 				
 
 		}
@@ -945,8 +944,9 @@ void myDisplay(void)
 			}
 			char* p0s[20];
 			sprintf((char*)p0s, "You ran out of time!");
-			print(center.x, center.y, (char*)p0s);
+			print(center.x, center.y,center.z, (char*)p0s);
 		}
+	
 	}
 
 	glutSwapBuffers();
