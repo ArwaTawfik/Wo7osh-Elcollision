@@ -14,7 +14,7 @@ GLuint tex;
 GLuint bushtex;
 GLuint spiketex;
 
-char title[] = "3D Model Loader Sample";
+char title[] = "The Lost Bear";
 
 // 3D Projection Options
 GLdouble fovy = 45.0;
@@ -78,19 +78,6 @@ public:
 	}
 };
 
-class Camera {
-public:
-	Vector3f eye, center, up;
-
-	Camera(float eyeX = 1.0f, float eyeY = 1.0f, float eyeZ = 1.0f, float centerX = 0.0f, float centerY = 0.0f, float centerZ = 0.0f, float upX = 0.0f, float upY = 1.0f, float upZ = 0.0f) {
-		eye = Vector3f(eyeX, eyeY, eyeZ);
-		center = Vector3f(centerX, centerY, centerZ);
-		up = Vector3f(upX, upY, upZ);
-	}
-};
-
-Camera camera;
-
 
 //---------------------------------------------------------------------------------------------------------------------------
 
@@ -105,8 +92,8 @@ Camera camera;
 
 // so to move it forward i translate the eye and at at the same time
 
-Vector3f eye(-17, 1,17 );
-Vector3f center(0, 1,17);
+Vector3f eye(-19, 2,17 );
+Vector3f center(0, 2,17);
 Vector3f up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -131,12 +118,22 @@ GLTexture tex_ground;
 GLTexture tex_brickground;
 GLTexture tex_grasswall;
 GLTexture tex_bush;
+int t = 1;
+int v = 0;
 
 //----------------------------------------Camera Functions---------------------------------------------
 void moveX(float d) {
 	Vector3f right = up.cross(center - eye).unit();
 	eye = eye + right * d;
 	center = center + right * d;
+
+	if (t == 2) {
+
+	}
+	if (t == 4) {
+
+
+	}
 }
 
 void moveY(float d) {
@@ -145,9 +142,12 @@ void moveY(float d) {
 }
 
 void moveZ(float d) {
-	Vector3f view = (center - eye).unit();
-	eye = eye + view * d;
-	center = center + view * d;
+	
+		Vector3f view = (center - eye).unit();
+		eye = eye + view * d;
+		center = center + view * d;
+	
+	
 }
 
 void rotateX(float a) {
@@ -281,7 +281,6 @@ void print(int x, int y, char* string)
 	}
 }
 
-
 //int wallsZ[12] = { 30,23,16,9,2,-4.5,0,-7,-14,-21,-28,-35 };
 int wallsZ[11] = { 15,8,1,-6,-13,-19.5,-25,-32,-39,-46,-53 };
 int found(int z) {
@@ -308,7 +307,14 @@ void moveUp() {
 	playerR = 0;
 	if (playerZ>-59 && (found(playerZ-step)==-1 || canPass(playerX, playerZ-step))) {
 		playerZ -= step;
-		moveX(1.0);
+		moveZ(1.0);
+
+		if (t != 2) {
+			int rotation = 90 - v;
+			rotateY(rotation);
+			v = 90;
+			t = 2;
+		}
 	}
 	else {
 		PS("sfx/slam.wav");
@@ -323,11 +329,22 @@ void moveUp() {
 
 	glutPostRedisplay();
 }
+
+
 void moveDown() {
 		playerR = 180;
 	if (playerZ < 19 && (found(playerZ+step)==-1 || canPass(playerX, playerZ + step))) {
 		playerZ += step;
-		moveX(-1.0);
+		moveZ(1.0);
+
+		if (t != 4) {
+			int rotation = 270 - v;
+			rotateY(rotation);
+			v = 270;
+			t = 4;
+		}
+
+		
 	}
 	else {
 		PS("sfx/slam.wav");
@@ -342,11 +359,21 @@ void moveDown() {
 
 	glutPostRedisplay();
 }
+
+
 void moveLeft() {
 		playerR = 90;
 	if (playerX > -19 && found(playerZ) == -1) {
 		playerX -= step;
-		moveZ(-1.0);
+		moveZ(1.0);
+
+		if (t != 3) {
+			int rotation = 180 - v;
+			rotateY(rotation);
+			v = 180;
+			
+			t = 3;
+		}
 	}
 	else {
 		PS("sfx/slam.wav");
@@ -361,11 +388,19 @@ void moveLeft() {
 
 	glutPostRedisplay();	//Re-draw scene 
 }
+
 void moveRight() {
 		playerR = 270;
 	if (playerX < 19 && found(playerZ) == -1) {
 		playerX += step;
 		moveZ(1.0);
+
+		if (t != 1) {
+			int rotation = 0 - v;
+			rotateY(rotation);
+			v =0;
+			t = 1;
+		}
 	}
 	else {
 		PS("sfx/slam.wav");
@@ -957,16 +992,16 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	if (button == '1'&&cameramode==3)
 	{
-			eye.y = eye.y - 0.5;
-			eye.x = eye.x + 4;
-			center.y = center.y - 0.5;
+			//eye.y = eye.y - 0.5;
+			eye.x = eye.x + 5;
+			//center.y = center.y - 0.5;
 			cameramode = 1;
 		
 	}
 	if (button == '3'&&cameramode==1) {
-		eye.y = eye.y + 0.5;
-		eye.x = eye.x - 4;
-		center.y = center.y + 0.5;
+		//eye.y = eye.y + 0.5;
+		eye.x = eye.x - 5;
+		//center.y = center.y + 0.5;
 		cameramode = 3;
 	}
 	glLoadIdentity();	//Clear Model_View Matrix
