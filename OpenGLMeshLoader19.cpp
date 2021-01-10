@@ -93,7 +93,9 @@ public:
 // so to move it forward i translate the eye and at at the same time
 
 Vector3f eye(-19, 2,17 );
-Vector3f center(0, 2,17);
+Vector3f center(-18.9, 2,17);
+Vector3f firstpersoncenter(0, 2, 17);
+
 Vector3f up(0, 1, 0);
 
 int cameraZoom = 0;
@@ -122,40 +124,15 @@ int t = 1;
 int v = 0;
 
 //----------------------------------------Camera Functions---------------------------------------------
-void moveX(float d) {
-	Vector3f right = up.cross(center - eye).unit();
-	eye = eye + right * d;
-	center = center + right * d;
-
-	if (t == 2) {
-
-	}
-	if (t == 4) {
-
-
-	}
-}
-
-void moveY(float d) {
-	eye = eye + up.unit() * d;
-	center = center + up.unit() * d;
-}
 
 void moveZ(float d) {
 	
 		Vector3f view = (center - eye).unit();
 		eye = eye + view * d;
 		center = center + view * d;
+		//first center
+		//3rd center
 	
-	
-}
-
-void rotateX(float a) {
-	Vector3f view = (center - eye).unit();
-	Vector3f right = up.cross(view).unit();
-	view = view * cos(DEG2RAD(a)) + up * sin(DEG2RAD(a));
-	//up = view.cross(right);
-	center = eye + view;
 }
 
 void rotateY(float a) {
@@ -259,6 +236,7 @@ void myInit(void)
 }
 
 
+//takes filename and plays the sound
 void PS(char* sound) {
 	PlaySound(TEXT(sound), NULL, SND_ASYNC);
 }
@@ -303,6 +281,9 @@ boolean canPass(int x,int z) {
 	}
 	return true;
 }
+
+
+int back = -5;
 void moveUp() {
 	playerR = 0;
 	if (playerZ>-59 && (found(playerZ-step)==-1 || canPass(playerX, playerZ-step))) {
@@ -314,7 +295,12 @@ void moveUp() {
 			rotateY(rotation);
 			v = 90;
 			t = 2;
+
+			if (cameramode == 3) {
+				moveZ(back);
+			}
 		}
+
 	}
 	else {
 		PS("sfx/slam.wav");
@@ -342,6 +328,10 @@ void moveDown() {
 			rotateY(rotation);
 			v = 270;
 			t = 4;
+
+			if (cameramode == 3) {
+				moveZ(back);
+			}
 		}
 
 		
@@ -371,8 +361,10 @@ void moveLeft() {
 			int rotation = 180 - v;
 			rotateY(rotation);
 			v = 180;
-			
 			t = 3;
+			if (cameramode == 3) {
+				moveZ(back);
+			}
 		}
 	}
 	else {
@@ -400,6 +392,10 @@ void moveRight() {
 			rotateY(rotation);
 			v =0;
 			t = 1;
+			if (cameramode == 3) {
+				moveZ(back);
+			}
+
 		}
 	}
 	else {
@@ -419,11 +415,11 @@ void moveRight() {
 void spe(int k, int x0, int y0) // keyboard special key function takes 3 parameters								// int k: is the special key pressed such as the keyboard arrows the f1,2,3 and so on
 {
 	if (k == GLUT_KEY_RIGHT && moveright) { //if the right arrow is pressed, then the object will be translated in the x axis by 10. (moving right)
-		moveRight();
+		//moveRight();
 	}
 	if (k == GLUT_KEY_LEFT && moveleft)
 	{ //if the left arrow is pressed, then the object will be translated in the x axis by -10. (moving left)
-		moveLeft();
+		//moveLeft();
 	}
 	if (k == GLUT_KEY_UP && moveup) { //if the up arrow is pressed, then the object will be translated in the y axis by 10. (moving upwords)
 		moveUp();
@@ -992,18 +988,15 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	if (button == '1'&&cameramode==3)
 	{
-			//eye.y = eye.y - 0.5;
+			moveZ(-back / 2);
 			eye.x = eye.x + 5;
-			//center.y = center.y - 0.5;
 			cameramode = 1;
-		
 	}
 	if (button == '3'&&cameramode==1) {
-		//eye.y = eye.y + 0.5;
-		eye.x = eye.x - 5;
-		//center.y = center.y + 0.5;
+		moveZ(back/2);
 		cameramode = 3;
 	}
+
 	glLoadIdentity();	//Clear Model_View Matrix
 
 	gluLookAt(eye.x,eye.y,eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
