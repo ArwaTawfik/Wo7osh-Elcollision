@@ -1092,7 +1092,12 @@ void myReshape(int w, int h)
 
 void myMouse(int button, int state, int x, int y)
 {
-
+	if (button == GLUT_LEFT_BUTTON) {
+		moveRight();
+	}
+	if (button == GLUT_RIGHT_BUTTON) {
+		moveLeft();
+	}
 	
 
 
