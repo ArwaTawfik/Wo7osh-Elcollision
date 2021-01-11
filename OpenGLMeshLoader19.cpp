@@ -648,6 +648,7 @@ void coin(int x, int z) {
 	glPushMatrix();
 	glTranslated(x, 1, z);
 	glScaled(0.3, 0.3, 0.3);
+	glRotated(45, 0, 0, 1);
 	model_coin.Draw();
 	glPopMatrix();
 	
@@ -794,37 +795,37 @@ boolean withinRange(int x,int z, int r) {
 void checkCoin() {
 	//boolean alreadythere = false;
 	if (withinRange(3, 4, 2)) {
-		score += 50;
+		score += 25;
 		if (coinpresent[0])
 			PS("sfx//coin.wav");
 		coinpresent[0] = false;
 	}
 	if (withinRange(-8, 17, 2)) {
-		score += 50;
+		score += 25;
 		if (coinpresent[1])
 			PS("sfx//coin.wav");
 		coinpresent[1] = false;
 	}
 	if (withinRange(4, -11, 2)) {
-		score += 50;
+		score += 25;
 		if (coinpresent[2])
 			PS("sfx//coin.wav");
 		coinpresent[2] = false;
 	}
 	if (withinRange(3, -36, 2)) {
-		score += 50;
+		score += 25;
 		if (coinpresent[3])
 			PS("sfx//coin.wav");
 		coinpresent[3] = false;
 	}
 	if (withinRange(15, -57, 2)) {
-		score += 50;
+		score += 25;
 		if (coinpresent[4])
 			PS("sfx//coin.wav");
 		coinpresent[4] = false;
 	}
 	if (withinRange(4, -43, 2)) {
-		score += 50;
+		score += 25;
 		if(coinpresent[5])
 			PS("sfx//coin.wav");
 		coinpresent[5] = false;
@@ -905,10 +906,10 @@ void myDisplay(void)
 	}
 	else
 	{
-		glClearColor(1.0f, 0.6f, 0.0f, 0.0);
+		glClearColor(0.0f, 0.0f, 0.0f, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
-			if (lvl1_passed||lvl2_passed) {
+			if ((lvl1_passed||lvl2_passed) && dead==false) {
 
 				if (lvl1_passed) {
 					if (w1) {
@@ -923,18 +924,17 @@ void myDisplay(void)
 					}
 				}
 
-				char* p0s[20];
-				sprintf((char*)p0s, "YOU WON!!!");
+				char* p0s[40];
+				sprintf((char*)p0s, "YOU WON!!!   Score: %d", score);
 				print(center.x, center.y,center.z, (char*)p0s);
-			}else
-					if (l) {
-						PS("sfx//lose.wav");
-						l = false;
-					}
-					char* p0s[20];
-					sprintf((char*)p0s, "You Lost!");
-					print(center.x, center.y, center.z,(char*)p0s);
+			}
+			else {
+
 				
+				char* p0s[40];
+				sprintf((char*)p0s, "You Lost!   Score: %d", score );
+				print(center.x, center.y, center.z, (char*)p0s);
+			}
 
 		}
 		else {
@@ -942,8 +942,8 @@ void myDisplay(void)
 				PS("sfx//lose.wav");
 				l = false;
 			}
-			char* p0s[20];
-			sprintf((char*)p0s, "You ran out of time!");
+			char* p0s[40];
+			sprintf((char*)p0s, "You ran out of time!   Score: %d",score );
 			print(center.x, center.y,center.z, (char*)p0s);
 		}
 	
