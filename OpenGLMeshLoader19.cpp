@@ -282,7 +282,8 @@ boolean canPass(int x,int z) {
 }
 
 
-int back = -5;
+int back = -2.5;
+
 void moveUp() {
 	playerR = 0;
 	if (playerZ>-59 && (found(playerZ-step)==-1 || canPass(playerX, playerZ-step))) {
@@ -290,12 +291,19 @@ void moveUp() {
 		moveZ(1.0);
 
 		if (t != 2) {
-			int rotation = 90 - v;
-			rotateY(rotation);
-			v = 90;
-			t = 2;
+			if (cameramode == 1) {
+				int rotation = 90 - v;
+				rotateY(rotation);
+				v = 90;
+				t = 2;
+			}
 
 			if (cameramode == 3) {
+				moveZ(-back);
+				int rotation = 90 - v;
+				rotateY(rotation);
+				v = 90;
+				t = 2;
 				moveZ(back);
 			}
 		}
@@ -323,12 +331,19 @@ void moveDown() {
 		moveZ(1.0);
 
 		if (t != 4) {
-			int rotation = 270 - v;
-			rotateY(rotation);
-			v = 270;
-			t = 4;
 
+			if (cameramode == 1) {
+				int rotation = 270 - v;
+				rotateY(rotation);
+				v = 270;
+				t = 4;
+			}
 			if (cameramode == 3) {
+				moveZ(-back);
+				int rotation = 270 - v;
+				rotateY(rotation);
+				v = 270;
+				t = 4;
 				moveZ(back);
 			}
 		}
@@ -357,11 +372,18 @@ void moveLeft() {
 		moveZ(1.0);
 
 		if (t != 3) {
-			int rotation = 180 - v;
-			rotateY(rotation);
-			v = 180;
-			t = 3;
+			if (cameramode == 1) {
+				int rotation = 180 - v;
+				rotateY(rotation);
+				v = 180;
+				t = 3;
+			}
 			if (cameramode == 3) {
+				moveZ(-back);
+				int rotation = 180 - v;
+				rotateY(rotation);
+				v = 180;
+				t = 3;
 				moveZ(back);
 			}
 		}
@@ -387,11 +409,19 @@ void moveRight() {
 		moveZ(1.0);
 
 		if (t != 1) {
+			if(cameramode==1){
+
 			int rotation = 0 - v;
 			rotateY(rotation);
 			v =0;
 			t = 1;
+			}
 			if (cameramode == 3) {
+				moveZ(-back);
+				int rotation = 0 - v;
+				rotateY(rotation);
+				v = 0;
+				t = 1;
 				moveZ(back);
 			}
 
@@ -779,7 +809,18 @@ void drawPlayer() {
 		model_bear.Draw();
 		glPopMatrix();
 }
-void drawGoal() {
+
+void drawMamaBear() {
+	glPushMatrix();
+	glTranslated(18, 0, -55);
+	glScalef(0.4, 0.4, 0.4);
+	glRotatef(playerR, 0, 1, 0);
+	glRotatef(180, 0, 1, 0);
+	model_bear.Draw();
+	glPopMatrix();
+}
+
+void drawApple() {
 	glPushMatrix();
 	glTranslated(0,5,0);
 	glScalef(1, 1, 1);
@@ -796,38 +837,50 @@ void checkCoin() {
 	//boolean alreadythere = false;
 	if (withinRange(3, 4, 2)) {
 		score += 25;
-		if (coinpresent[0])
+		if (coinpresent[0]) {
+			score += 25;
 			PS("sfx//coin.wav");
+		}
 		coinpresent[0] = false;
 	}
 	if (withinRange(-8, 17, 2)) {
 		score += 25;
-		if (coinpresent[1])
+		if (coinpresent[1]) {
+			score += 25;
 			PS("sfx//coin.wav");
+		}
 		coinpresent[1] = false;
 	}
 	if (withinRange(4, -11, 2)) {
 		score += 25;
-		if (coinpresent[2])
+		if (coinpresent[2]) {
+			score += 25;
 			PS("sfx//coin.wav");
+		}
 		coinpresent[2] = false;
 	}
 	if (withinRange(3, -36, 2)) {
 		score += 25;
-		if (coinpresent[3])
+		if (coinpresent[3]) {
+			score += 25;
 			PS("sfx//coin.wav");
+		}
 		coinpresent[3] = false;
 	}
 	if (withinRange(15, -57, 2)) {
-		score += 25;
-		if (coinpresent[4])
+		
+		if (coinpresent[4]) {
+			score += 25;
 			PS("sfx//coin.wav");
+		}
 		coinpresent[4] = false;
 	}
 	if (withinRange(4, -43, 2)) {
-		score += 25;
-		if(coinpresent[5])
+		
+		if (coinpresent[5]) {
+			score += 25;
 			PS("sfx//coin.wav");
+		}
 		coinpresent[5] = false;
 	}
 	
@@ -894,14 +947,13 @@ void myDisplay(void)
 		RenderGround();
 
 		drawPlayer();
-		drawGoal();
-		renderLevel1();
+		drawMamaBear();
 
+		//drawApple
+
+		renderLevel1();
 		renderLevel2();
 		drawCoins();
-
-
-		//sky box
 		skyBox();
 	}
 	else
@@ -993,7 +1045,7 @@ void myKeyboard(unsigned char button, int x, int y)
 			cameramode = 1;
 	}
 	if (button == '3'&&cameramode==1) {
-		moveZ(back/2);
+		moveZ(back);
 		cameramode = 3;
 	}
 
