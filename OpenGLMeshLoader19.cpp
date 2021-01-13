@@ -7,6 +7,14 @@
 
 #define DEG2RAD(a) (a * 0.0174532925)
 
+//donia
+bool Inthigh = true;
+bool Intlow = false;
+float Positiony = 1.0;
+float Intensity = 0.1;
+float Lightangle = 10.0;
+//
+
 int WIDTH = 1280;
 int HEIGHT = 720;
 
@@ -164,20 +172,20 @@ void InitLightSource()
 	glEnable(GL_LIGHT0);
 
 	// Define Light source 0 ambient light
-	GLfloat ambient[] = { 0.1f, 0.1f, 0.1, 1.0f };
-	glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+	//GLfloat ambient[] = { 0.1f, 0.1f, 0.1, 1.0f };
+	//glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
 
-	// Define Light source 0 diffuse light
-	GLfloat diffuse[] = { 0.5f, 0.5f, 0.5f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
+	//// Define Light source 0 diffuse light
+	//GLfloat diffuse[] = { 0.5f, 0.5f, 0.5f, 1.0f };
+	//glLightfv(GL_LIGHT0, GL_DIFFUSE, diffuse);
 
-	// Define Light source 0 Specular light
-	GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
+	//// Define Light source 0 Specular light
+	//GLfloat specular[] = { 1.0f, 1.0f, 1.0f, 1.0f };
+	//glLightfv(GL_LIGHT0, GL_SPECULAR, specular);
 
-	// Finally, define light source 0 position in World Space
-	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
-	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+	//// Finally, define light source 0 position in World Space
+	//GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
+	//glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 }
 
 //=======================================================================
@@ -189,7 +197,7 @@ void InitMaterial()
 	glEnable(GL_COLOR_MATERIAL);
 
 	// Sich will be assigneet Material Properties whd by glColor
-	glColorMaterial(GL_FRONT, GL_AMBIENT_AND_DIFFUSE);
+	glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
 	// Set Material's Specular Color
 	// Will be applied to all objects
@@ -197,7 +205,7 @@ void InitMaterial()
 	glMaterialfv(GL_FRONT, GL_SPECULAR, specular);
 
 	// Set Material's Shine value (0->128)
-	GLfloat shininess[] = { 96.0f };
+	GLfloat shininess[] = { 90.0f };
 	glMaterialfv(GL_FRONT, GL_SHININESS, shininess);
 }
 
@@ -317,6 +325,8 @@ void moveUp() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
+	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -358,6 +368,8 @@ void moveDown() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
+	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -396,6 +408,8 @@ void moveLeft() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
+	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -435,6 +449,8 @@ void moveRight() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
+	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -937,11 +953,17 @@ void myDisplay(void)
 	if (!dead && timeout > 0 && !lvl2_passed && (celebrate_time==10 || celebrate_time<1)) {
 		currz = center.z;
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-		
-		GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
-		GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
+
+		GLfloat lightIntensity[] = { 0.1, 0.1, 0.1, 1.0f };
+		GLfloat lightIntensity1[] = { Intensity, Intensity, Intensity, 1.0f };
+
+		GLfloat lightPosition[] = { 0.0,100.0, 0.0, 1 };
+		GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, Lightangle);
+		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
-		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
+		glLightfv(GL_LIGHT0, GL_DIFFUSE, lightIntensity);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity1);
 
 		// Draw Ground
 		RenderGround();
@@ -957,7 +979,12 @@ void myDisplay(void)
 		skyBox();
 	}
 	else
-	{
+	{ 
+		glEnable(GL_LIGHT0);
+		GLfloat lightIntensity[] = { 0.7, 0.7, 0.7, 1.0f };
+		GLfloat lightPosition[] = { 0.0f, 100.0f, 0.0f, 0.0f };
+		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+		glLightfv(GL_LIGHT0, GL_AMBIENT, lightIntensity);
 		glClearColor(0.0f, 0.0f, 0.0f, 0.0);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		if (timeout>0) {
@@ -1053,6 +1080,8 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	gluLookAt(eye.x,eye.y,eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
+	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
 
@@ -1165,6 +1194,26 @@ void LoadAssets()
 	loadBMP(&spiketex, "Textures/spikes.bmp", true);
 }
 
+void timer2(int val) {
+	if (Inthigh) {
+		Intensity = 0.9;
+		Inthigh = false;
+		Intlow = true;
+
+
+	}
+	else if (Intlow) {
+		Intensity = 0.0;
+
+		Intlow = false;
+		Inthigh = true;
+	}
+
+
+	glutPostRedisplay();
+	glutTimerFunc(20000, timer2, 0);
+
+}
 
 void timer(int val) {
 	
@@ -1172,6 +1221,8 @@ void timer(int val) {
 		celebrate_time--;
 	}
 	timeout--;
+	Positiony = -1 * Positiony;
+	Lightangle = ((int)rand() % 181) / 2;
 	glutPostRedisplay();
 	glutTimerFunc(100, timer, 0);
 
@@ -1191,6 +1242,7 @@ void main(int argc, char** argv)
 
 	glutCreateWindow(title);
 	glutTimerFunc(0, timer, 0);
+	glutTimerFunc(0, timer2, 0);
 
 	//PS("sfx//win.wav");
 
