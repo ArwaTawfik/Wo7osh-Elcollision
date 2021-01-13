@@ -10,7 +10,7 @@
 //donia
 bool Inthigh = true;
 bool Intlow = false;
-float Positiony = 1.0;
+float Positionx = 1.0;
 float Intensity = 0.1;
 float Lightangle = 10.0;
 //
@@ -325,7 +325,8 @@ void moveUp() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
-	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	//GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	GLfloat l0Direction[] = { Positionx, 6, 0.0 };
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -368,7 +369,7 @@ void moveDown() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
-	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	GLfloat l0Direction[] = { 0.0, Positionx, 0.0 };
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -408,7 +409,7 @@ void moveLeft() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
-	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	GLfloat l0Direction[] = { 0.0, Positionx, 0.0 };
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -449,7 +450,7 @@ void moveRight() {
 
 	gluLookAt(eye.x, eye.y, eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
-	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	GLfloat l0Direction[] = { 0.0, Positionx, 0.0 };
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -957,8 +958,8 @@ void myDisplay(void)
 		GLfloat lightIntensity[] = { 0.1, 0.1, 0.1, 1.0f };
 		GLfloat lightIntensity1[] = { Intensity, Intensity, Intensity, 1.0f };
 
-		GLfloat lightPosition[] = { 0.0,100.0, 0.0, 1 };
-		GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+		GLfloat lightPosition[] = { 0.0,1.0, 0.0, 1 };
+		GLfloat l0Direction[] = { 0.0, Positionx, 0.0 };
 		glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, Lightangle);
 		glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 		glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
@@ -1080,7 +1081,7 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	gluLookAt(eye.x,eye.y,eye.z, center.x, center.y, center.z, up.x, up.y, up.z);	//Setup Camera with modified paramters
 
-	GLfloat l0Direction[] = { 0.0, Positiony, 0.0 };
+	GLfloat l0Direction[] = { 0.0, Positionx, 0.0 };
 	glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, l0Direction);
 	GLfloat light_position[] = { 0.0f, 10.0f, 0.0f, 1.0f };
 	glLightfv(GL_LIGHT0, GL_POSITION, light_position);
@@ -1199,10 +1200,12 @@ void timer2(int val) {
 		Intensity = 0.9;
 		Inthigh = false;
 		Intlow = true;
+		PS("sfx//thunder.wav");
 
 
 	}
 	else if (Intlow) {
+		//play thunder sound
 		Intensity = 0.0;
 
 		Intlow = false;
@@ -1211,7 +1214,7 @@ void timer2(int val) {
 
 
 	glutPostRedisplay();
-	glutTimerFunc(20000, timer2, 0);
+	glutTimerFunc(5000,timer2, 0);
 
 }
 
@@ -1221,7 +1224,7 @@ void timer(int val) {
 		celebrate_time--;
 	}
 	timeout--;
-	Positiony = -1 * Positiony;
+	Positionx = -1 * Positionx;
 	Lightangle = ((int)rand() % 181) / 2;
 	glutPostRedisplay();
 	glutTimerFunc(100, timer, 0);
@@ -1242,7 +1245,7 @@ void main(int argc, char** argv)
 
 	glutCreateWindow(title);
 	glutTimerFunc(0, timer, 0);
-	glutTimerFunc(0, timer2, 0);
+	glutTimerFunc(5000, timer2, 0);
 
 	//PS("sfx//win.wav");
 
