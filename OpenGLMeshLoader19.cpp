@@ -999,7 +999,7 @@ void myDisplay(void)
 				}
 				if (lvl2_passed) {
 					if (w2) {
-						PS("sfx//win.wav");
+						PS("sfx//dabdoba.wav");
 						w2 = false;
 					}
 				}
@@ -1018,7 +1018,7 @@ void myDisplay(void)
 
 		}
 		else {
-			if (l) {
+			if (l&&w2) {
 				PS("sfx//lose.wav");
 				l = false;
 			}
@@ -1052,6 +1052,7 @@ void myKeyboard(unsigned char button, int x, int y)
 	case'w':
 		eye.z -= 0.2;
 		center.z -= 0.2;
+		rotateY(10);
 		break;
 	case's':
 		eye.z += 0.2;
@@ -1196,20 +1197,27 @@ void LoadAssets()
 }
 
 void timer2(int val) {
-	if (Inthigh) {
+	if (w2) {
+		if (Inthigh) {
+			Intensity = 0.9;
+			Inthigh = false;
+			Intlow = true;
+			PS("sfx//thunder.wav");
+
+
+		}
+		else if (Intlow) {
+			//play thunder sound
+			Intensity = 0.0;
+
+			Intlow = false;
+			Inthigh = true;
+		}
+	}
+	else {
 		Intensity = 0.9;
 		Inthigh = false;
 		Intlow = true;
-		PS("sfx//thunder.wav");
-
-
-	}
-	else if (Intlow) {
-		//play thunder sound
-		Intensity = 0.0;
-
-		Intlow = false;
-		Inthigh = true;
 	}
 
 
