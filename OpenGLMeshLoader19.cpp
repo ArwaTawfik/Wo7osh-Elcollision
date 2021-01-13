@@ -39,7 +39,7 @@ BOOLEAN dead = false;
 BOOLEAN lvl1_passed = false;
 BOOLEAN lvl2_passed = false;
 int score = 0;
-int timeout = 1600;
+int timeout = 800;
 int celebrate_time = 10;
 bool coinpresent[6] = { true, true, true, true, true, true };
 
