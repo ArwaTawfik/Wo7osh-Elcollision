@@ -39,7 +39,7 @@ BOOLEAN dead = false;
 BOOLEAN lvl1_passed = false;
 BOOLEAN lvl2_passed = false;
 int score = 0;
-int timeout = 800;
+int timeout = 1600;
 int celebrate_time = 10;
 bool coinpresent[6] = { true, true, true, true, true, true };
 
@@ -1069,8 +1069,8 @@ void myKeyboard(unsigned char button, int x, int y)
 
 	if (button == '1'&&cameramode==3)
 	{
-			moveZ(-back / 2);
-			eye.x = eye.x + 5;
+			moveZ(-back);
+			
 			cameramode = 1;
 	}
 	if (button == '3'&&cameramode==1) {
@@ -1196,8 +1196,15 @@ void LoadAssets()
 	loadBMP(&spiketex, "Textures/spikes.bmp", true);
 }
 
+bool j = false;
 void timer2(int val) {
 	if (w2) {
+		if (!w1&&!j) {
+			Intensity = 0.9;
+			Inthigh = false;
+			Intlow = true;
+			j = true;
+		}else
 		if (Inthigh) {
 			Intensity = 0.9;
 			Inthigh = false;
