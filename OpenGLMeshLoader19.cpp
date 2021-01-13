@@ -711,7 +711,7 @@ void drawCoins() {
 	if (coinpresent[3])
 	coin(3, -36);
 	if (coinpresent[4])
-	coin(15, -57);
+	coin(-12, -50);
 	if (coinpresent[5])
 	coin(4, -43);
 	
@@ -883,7 +883,7 @@ void checkCoin() {
 		}
 		coinpresent[3] = false;
 	}
-	if (withinRange(15, -57, 2)) {
+	if (withinRange(-12, -50, 2)) {
 		
 		if (coinpresent[4]) {
 			score += 25;
@@ -916,7 +916,7 @@ void checkBush() {
 }
 boolean spikealreadythere = false;
 void checkSpike() {
-	if (withinRange(15, -50, 1) || withinRange(-6, -30, 1)) {
+	if (withinRange(15, -50, 2) || withinRange(-6, -30, 2)) {
 		if (!spikealreadythere) {
 			PS("sfx//tomhurt.wav");
 			dead = true;
