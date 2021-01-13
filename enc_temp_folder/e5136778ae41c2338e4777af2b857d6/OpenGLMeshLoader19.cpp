@@ -39,7 +39,7 @@ BOOLEAN dead = false;
 BOOLEAN lvl1_passed = false;
 BOOLEAN lvl2_passed = false;
 int score = 0;
-int timeout = 800;
+int timeout = 1600;
 int celebrate_time = 10;
 bool coinpresent[6] = { true, true, true, true, true, true };
 
@@ -1238,9 +1238,7 @@ void timer(int val) {
 	if (lvl1_passed && !lvl2_passed) {
 		celebrate_time--;
 	}
-	if (!lvl2_passed && !dead) {
-		timeout--;
-	}
+	timeout--;
 	Positionx = -1 * Positionx;
 	Lightangle = ((int)rand() % 181) / 2;
 	glutPostRedisplay();
