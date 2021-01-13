@@ -1238,9 +1238,7 @@ void timer(int val) {
 	if (lvl1_passed && !lvl2_passed) {
 		celebrate_time--;
 	}
-	if (!lvl2_passed && !dead) {
-		timeout--;
-	}
+	timeout--;
 	Positionx = -1 * Positionx;
 	Lightangle = ((int)rand() % 181) / 2;
 	glutPostRedisplay();
